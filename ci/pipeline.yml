@@ -1,0 +1,69 @@
+---
+
+resources:
+
+- name: deploy-source
+  type: git
+  source: 
+    uri: https://github.com/18F/cg-deploy-aws-servicebroker.git
+    branch: master
+
+- name: release
+  type: github-release
+  source:
+    owner: awslabs
+    repository: aws-servicebroker
+
+# - name: cf-staging-app
+#   type: cf
+#   source:
+#     api: ((cf_staging_api))
+#     client_id: ((cf_staging_client_id))
+#     client_secret: ((cf_staging_client_secret))
+#     organization: ((cf_staging_organization))
+#     space: ((cf_staging_space))
+    
+jobs:
+
+- name: prepare-release
+  plan:
+  - in_parallel:
+    - get: deploy-source
+      params: {depth: 1}
+    - get: release
+      trigger: true
+    - task: parameterize-mf
+      file: deploy-source/ci/tasks/parameterize-mf.yml
+      
+
+# - name: deploy-staging
+#   serial_groups: [staging]
+#   plan:
+#   - in_parallel:
+#     - get: ci
+#       params: {depth: 1}
+#     - get: release
+#       trigger: true
+#   - put: cf-staging-app
+#     params:
+#       manifest: source/manifest.yml
+#       path: release
+#       vars:
+#         route: 
+#   - task: smoke-test
+#     file: source/ci/tasks/smoke-test.yml
+#   - task: cutover
+#     file: source/ci/tasks/cutover.yml
+
+# - name: integration-test
+#   serial_groups: [staging]
+#   plan:
+#   - in_parallel:
+#     - get: source
+#       passed: [deploy-staging]
+#       params: {depth: 1}
+#     - get: release
+#       passed: [deploy-staging]
+#       trigger: true
+#   - task: integration-test
+#     file: source/ci/tasks/integration-test.yml
