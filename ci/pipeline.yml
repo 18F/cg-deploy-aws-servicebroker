@@ -32,8 +32,8 @@ jobs:
       params: {depth: 1}
     - get: release
       trigger: true
-    - task: parameterize-mf
-      file: deploy-source/ci/tasks/parameterize-mf.yml
+  - task: parameterize-mf
+    file: deploy-source/ci/tasks/parameterize-mf.yml
       
 
 # - name: deploy-staging
